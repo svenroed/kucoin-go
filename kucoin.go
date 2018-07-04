@@ -215,6 +215,24 @@ func (b *Kucoin) GetCoinBalance(c string) (coinBalance CoinBalance, err error) {
 	return
 }
 
+func (b *Kucoin) GetCoinBalances() (coinBalance []CoinBalance, err error) {
+	r, err := b.client.do("GET", "account/balance", nil, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawCoinBalances
+	err = json.Unmarshal(r, &rawRes)
+	coinBalance = rawRes.Data
+	return
+}
+
 // GetCoinDepositAddress is used to get the address at chosen coin at Kucoin along with other meta data.
 func (b *Kucoin) GetCoinDepositAddress(c string) (coinDepositAddress CoinDepositAddress, err error) {
 	r, err := b.client.do("GET", fmt.Sprintf("account/%s/wallet/address", strings.ToUpper(c)), nil, true)
